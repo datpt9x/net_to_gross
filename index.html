@@ -210,7 +210,7 @@
                             <td>Tổng chi phí công ty (Trước chuyển đổi)</td>
                             <td>
                                 <span id="totalCompanyCostOld" class="highlight-value text-gray-800"></span>
-                                <span class="explanation-text">(Lương Net Cũ + Công ty đóng BHXH Cũ)</span>
+                                <span class="explanation-text">(Lương Net Cũ + Công ty đóng BHXH Cũ + NLĐ đóng BHXH Cũ (do công ty chi trả))</span>
                             </td>
                         </tr>
                         <tr>
@@ -316,10 +316,14 @@
             const newGrossSalary = oldNetSalary + addedToGross;
             const nldNewContribution = newBHXHSalary * nldRate;
             const companyOldContribution = oldBHXHSalaryFixed * companyRate;
+            const nldOldContribution = oldBHXHSalaryFixed * nldRate; // Employee's old contribution
             const companyNewContribution = newBHXHSalary * companyRate;
             const newNetReceived = newGrossSalary - nldNewContribution;
             const netDifference = newNetReceived - oldNetSalary;
-            const totalCompanyCostOld = oldNetSalary + companyOldContribution; // Lương Net cũ + Công ty đóng BHXH cũ
+            
+            // CORRECTED: Total company cost in old system includes Net Salary, company's BHXH, AND employee's BHXH (which company covered)
+            const totalCompanyCostOld = oldNetSalary + companyOldContribution + nldOldContribution; 
+            
             const totalCompanyCostNew = newGrossSalary + companyNewContribution; // Lương Gross mới + Công ty đóng BHXH mới
             const companyCostDifference = totalCompanyCostNew - totalCompanyCostOld;
 
