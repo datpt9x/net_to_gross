@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ tính toán lương Gross Dmobin</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align items to start to prevent content from jumping */
+            min-height: 100vh;
+            padding: 2rem 1rem; /* Add padding for mobile view */
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 800px;
+            box-sizing: border-box;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="selection:bg-blue-200">
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Công cụ tính toán chuyển đổi lương Gross</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Input: Lương Net Cũ -->
+            <div>
+                <label for="oldNetSalary" class="block text-gray-700 text-sm font-medium mb-2">Lương Net Cũ (VNĐ):</label>
+                <input type="number" id="oldNetSalary" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" placeholder="Ví dụ: 10000000">
+            </div>
+            <!-- Input: Mức Lương Đóng BHXH Mới -->
+            <div>
+                <label for="newBHXHSalary" class="block text-gray-700 text-sm font-medium mb-2">Mức Lương Đóng BHXH Mới (VNĐ):</label>
+                <input type="number" id="newBHXHSalary" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" placeholder="Ví dụ: 7100000">
+            </div>
+        </div>
+
+        <button id="calculateBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
+            Tính toán
+        </button>
+
+        <div id="results" class="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200 hidden">
+            <h2 class="text-xl font-semibold text-blue-800 mb-4">Kết quả tính toán:</h2>
+            <div class="space-y-3 text-gray-700">
+                <p><strong>Tỷ lệ NLĐ đóng BHXH:</strong> <span id="nldRate">10.5%</span></p>
+                <p><strong>Tỷ lệ Công ty đóng BHXH:</strong> <span id="companyRate">21.5%</span></p>
+                <hr class="my-3 border-blue-200">
+                <p><strong>Lương BHXH Cũ (Giả định 5.008.000₫):</strong> <span id="oldBHXHSalary" class="font-medium"></span></p>
+                <p><strong>Số tiền 10.5% lương BHXH cũ công ty cộng thêm vào Gross:</strong> <span id="addedToGross" class="font-medium"></span></p>
+                <p><strong>Lương Gross Mới:</strong> <span id="newGrossSalary" class="font-bold text-blue-700"></span></p>
+                <hr class="my-3 border-blue-200">
+                <p><strong>NLĐ đóng BHXH Mới (10.5% trên mức đóng BHXH mới):</strong> <span id="nldNewContribution" class="font-medium"></span></p>
+                <p><strong>Công ty đóng BHXH Cũ (21.5% trên mức đóng BHXH cũ):</strong> <span id="companyOldContribution" class="font-medium"></span></p>
+                <p><strong>Công ty đóng BHXH Mới (21.5% trên mức đóng BHXH mới):</strong> <span id="companyNewContribution" class="font-medium"></span></p>
+                <hr class="my-3 border-blue-200">
+                <p><strong>Thực nhận sau khi trừ BHXH (Lương Net Mới):</strong> <span id="newNetReceived" class="font-bold text-green-700"></span></p>
+                <p><strong>Chênh lệch thực nhận (giảm so với ban đầu):</strong> <span id="netDifference" class="font-bold text-red-600"></span></p>
+                <hr class="my-3 border-blue-200">
+                <p><strong>Tổng chi phí công ty (Trước chuyển đổi):</strong> <span id="totalCompanyCostOld" class="font-bold text-gray-800"></span></p>
+                <p><strong>Tổng chi phí công ty (Sau chuyển đổi):</strong> <span id="totalCompanyCostNew" class="font-bold text-gray-800"></span></p>
+                <p><strong>Chênh lệch Tổng chi phí công ty:</strong> <span id="companyCostDifference" class="font-bold text-gray-800"></span></p>
+            </div>
+        </div>
+
+        <!-- Message Box for errors or notifications -->
+        <div id="messageBox" class="hidden mt-4 p-4 rounded-lg text-sm text-center" role="alert"></div>
+
+    </div>
+
+    <script>
+        // Function to format numbers as Vietnamese currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        }
+
+        // Function to show messages in the message box
+        function showMessage(message, type = 'info') {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-yellow-100', 'text-yellow-700');
+
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-100', 'text-red-700');
+            } else if (type === 'success') {
+                messageBox.classList.add('bg-green-100', 'text-green-700');
+            } else { // info or default
+                messageBox.classList.add('bg-blue-100', 'text-blue-700');
+            }
+            messageBox.classList.remove('hidden');
+        }
+
+        // Function to hide the message box
+        function hideMessageBox() {
+            document.getElementById('messageBox').classList.add('hidden');
+        }
+
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            hideMessageBox(); // Clear previous messages
+
+            const oldNetSalaryInput = document.getElementById('oldNetSalary');
+            const newBHXHSalaryInput = document.getElementById('newBHXHSalary');
+
+            const oldNetSalary = parseFloat(oldNetSalaryInput.value);
+            const newBHXHSalary = parseFloat(newBHXHSalaryInput.value);
+
+            // Basic input validation
+            if (isNaN(oldNetSalary) || isNaN(newBHXHSalary) || oldNetSalary <= 0 || newBHXHSalary <= 0) {
+                showMessage('Vui lòng nhập số tiền hợp lệ cho cả Lương Net Cũ và Mức Lương Đóng BHXH Mới.', 'error');
+                document.getElementById('results').classList.add('hidden');
+                return;
+            }
+
+            // Constants based on the provided document
+            const nldRate = 0.105; // Tỷ lệ NLĐ đóng BHXH (10.5%)
+            const companyRate = 0.215; // Tỷ lệ Công ty đóng BHXH (21.5%)
+            const oldBHXHSalaryFixed = 5008000; // Mức lương đóng BHXH cũ cố định theo ví dụ tài liệu
+
+            // Calculations based on Google Sheet logic
+            const addedToGross = oldBHXHSalaryFixed * nldRate;
+            const newGrossSalary = oldNetSalary + addedToGross;
+            const nldNewContribution = newBHXHSalary * nldRate;
+            const companyOldContribution = oldBHXHSalaryFixed * companyRate;
+            const companyNewContribution = newBHXHSalary * companyRate;
+            const newNetReceived = newGrossSalary - nldNewContribution;
+            const netDifference = newNetReceived - oldNetSalary;
+            const totalCompanyCostOld = oldNetSalary + companyOldContribution; // Lương Net cũ + Công ty đóng BHXH cũ
+            const totalCompanyCostNew = newGrossSalary + companyNewContribution; // Lương Gross mới + Công ty đóng BHXH mới
+            const companyCostDifference = totalCompanyCostNew - totalCompanyCostOld;
+
+            // Display results
+            document.getElementById('oldBHXHSalary').textContent = formatCurrency(oldBHXHSalaryFixed);
+            document.getElementById('addedToGross').textContent = formatCurrency(addedToGross);
+            document.getElementById('newGrossSalary').textContent = formatCurrency(newGrossSalary);
+            document.getElementById('nldNewContribution').textContent = formatCurrency(nldNewContribution);
+            document.getElementById('companyOldContribution').textContent = formatCurrency(companyOldContribution);
+            document.getElementById('companyNewContribution').textContent = formatCurrency(companyNewContribution);
+            document.getElementById('newNetReceived').textContent = formatCurrency(newNetReceived);
+
+            const netDiffElement = document.getElementById('netDifference');
+            netDiffElement.textContent = formatCurrency(netDifference);
+            if (netDifference < 0) {
+                netDiffElement.classList.add('text-red-600');
+                netDiffElement.classList.remove('text-green-600');
+            } else if (netDifference > 0) {
+                netDiffElement.classList.add('text-green-600');
+                netDiffElement.classList.remove('text-red-600');
+            } else {
+                netDiffElement.classList.remove('text-red-600', 'text-green-600');
+            }
+
+            document.getElementById('totalCompanyCostOld').textContent = formatCurrency(totalCompanyCostOld);
+            document.getElementById('totalCompanyCostNew').textContent = formatCurrency(totalCompanyCostNew);
+            document.getElementById('companyCostDifference').textContent = formatCurrency(companyCostDifference);
+
+            document.getElementById('results').classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
