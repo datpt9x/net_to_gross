@@ -37,6 +37,12 @@
         input[type="number"] {
             -moz-appearance: textfield;
         }
+        .explanation {
+            font-size: 0.875rem; /* text-sm */
+            color: #6b7280; /* gray-500 */
+            margin-left: 0.5rem;
+            display: inline-block;
+        }
     </style>
 </head>
 <body class="selection:bg-blue-200">
@@ -66,20 +72,64 @@
                 <p><strong>Tỷ lệ NLĐ đóng BHXH:</strong> <span id="nldRate">10.5%</span></p>
                 <p><strong>Tỷ lệ Công ty đóng BHXH:</strong> <span id="companyRate">21.5%</span></p>
                 <hr class="my-3 border-blue-200">
-                <p><strong>Lương BHXH Cũ (Giả định 5.008.000₫):</strong> <span id="oldBHXHSalary" class="font-medium"></span></p>
-                <p><strong>Số tiền 10.5% lương BHXH cũ công ty cộng thêm vào Gross:</strong> <span id="addedToGross" class="font-medium"></span></p>
-                <p><strong>Lương Gross Mới:</strong> <span id="newGrossSalary" class="font-bold text-blue-700"></span></p>
+                <p>
+                    <strong>Lương BHXH Cũ (Giả định 5.008.000₫):</strong>
+                    <span id="oldBHXHSalary" class="font-medium"></span>
+                    <span class="explanation">(Dựa trên ví dụ trong tài liệu chuyển đổi lương)</span>
+                </p>
+                <p>
+                    <strong>Số tiền 10.5% lương BHXH cũ công ty cộng thêm vào Gross:</strong>
+                    <span id="addedToGross" class="font-medium"></span>
+                    <span class="explanation">(Lương BHXH Cũ * Tỷ lệ NLĐ đóng BHXH)</span>
+                </p>
+                <p>
+                    <strong>Lương Gross Mới:</strong>
+                    <span id="newGrossSalary" class="font-bold text-blue-700"></span>
+                    <span class="explanation">(Lương Net Cũ + Số tiền công ty cộng thêm)</span>
+                </p>
                 <hr class="my-3 border-blue-200">
-                <p><strong>NLĐ đóng BHXH Mới (10.5% trên mức đóng BHXH mới):</strong> <span id="nldNewContribution" class="font-medium"></span></p>
-                <p><strong>Công ty đóng BHXH Cũ (21.5% trên mức đóng BHXH cũ):</strong> <span id="companyOldContribution" class="font-medium"></span></p>
-                <p><strong>Công ty đóng BHXH Mới (21.5% trên mức đóng BHXH mới):</strong> <span id="companyNewContribution" class="font-medium"></span></p>
+                <p>
+                    <strong>NLĐ đóng BHXH Mới (10.5% trên mức đóng BHXH mới):</strong>
+                    <span id="nldNewContribution" class="font-medium"></span>
+                    <span class="explanation">(Mức Lương Đóng BHXH Mới * Tỷ lệ NLĐ đóng BHXH)</span>
+                </p>
+                <p>
+                    <strong>Công ty đóng BHXH Cũ (21.5% trên mức đóng BHXH cũ):</strong>
+                    <span id="companyOldContribution" class="font-medium"></span>
+                    <span class="explanation">(Lương BHXH Cũ * Tỷ lệ Công ty đóng BHXH)</span>
+                </p>
+                <p>
+                    <strong>Công ty đóng BHXH Mới (21.5% trên mức đóng BHXH mới):</strong>
+                    <span id="companyNewContribution" class="font-medium"></span>
+                    <span class="explanation">(Mức Lương Đóng BHXH Mới * Tỷ lệ Công ty đóng BHXH)</span>
+                </p>
                 <hr class="my-3 border-blue-200">
-                <p><strong>Thực nhận sau khi trừ BHXH (Lương Net Mới):</strong> <span id="newNetReceived" class="font-bold text-green-700"></span></p>
-                <p><strong>Chênh lệch thực nhận (giảm so với ban đầu):</strong> <span id="netDifference" class="font-bold text-red-600"></span></p>
+                <p>
+                    <strong>Thực nhận sau khi trừ BHXH (Lương Net Mới):</strong>
+                    <span id="newNetReceived" class="font-bold text-green-700"></span>
+                    <span class="explanation">(Lương Gross Mới - NLĐ đóng BHXH Mới)</span>
+                </p>
+                <p>
+                    <strong>Chênh lệch thực nhận (so với Lương Net Cũ):</strong>
+                    <span id="netDifference" class="font-bold text-red-600"></span>
+                    <span class="explanation">(Thực nhận sau khi trừ BHXH - Lương Net Cũ)</span>
+                </p>
                 <hr class="my-3 border-blue-200">
-                <p><strong>Tổng chi phí công ty (Trước chuyển đổi):</strong> <span id="totalCompanyCostOld" class="font-bold text-gray-800"></span></p>
-                <p><strong>Tổng chi phí công ty (Sau chuyển đổi):</strong> <span id="totalCompanyCostNew" class="font-bold text-gray-800"></span></p>
-                <p><strong>Chênh lệch Tổng chi phí công ty:</strong> <span id="companyCostDifference" class="font-bold text-gray-800"></span></p>
+                <p>
+                    <strong>Tổng chi phí công ty (Trước chuyển đổi):</strong>
+                    <span id="totalCompanyCostOld" class="font-bold text-gray-800"></span>
+                    <span class="explanation">(Lương Net Cũ + Công ty đóng BHXH Cũ)</span>
+                </p>
+                <p>
+                    <strong>Tổng chi phí công ty (Sau chuyển đổi):</strong>
+                    <span id="totalCompanyCostNew" class="font-bold text-gray-800"></span>
+                    <span class="explanation">(Lương Gross Mới + Công ty đóng BHXH Mới)</span>
+                </p>
+                <p>
+                    <strong>Chênh lệch Tổng chi phí công ty:</strong>
+                    <span id="companyCostDifference" class="font-bold text-gray-800"></span>
+                    <span class="explanation">(Tổng chi phí công ty Sau chuyển đổi - Tổng chi phí công ty Trước chuyển đổi)</span>
+                </p>
             </div>
         </div>
 
