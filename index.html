@@ -37,11 +37,38 @@
         input[type="number"] {
             -moz-appearance: textfield;
         }
-        .explanation {
+        .explanation-text {
             font-size: 0.875rem; /* text-sm */
             color: #6b7280; /* gray-500 */
             margin-left: 0.5rem;
-            display: inline-block;
+            display: block; /* Ensure it takes full width below the value in table */
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .results-table th, .results-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e2e8f0; /* gray-200 */
+            text-align: left;
+        }
+        .results-table th {
+            background-color: #f8fafc; /* gray-50 */
+            font-weight: 600;
+            color: #4a5568; /* gray-700 */
+        }
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+        .results-table .highlight-value {
+            font-weight: bold;
+        }
+        .results-table .positive {
+            color: #10b981; /* green-500 */
+        }
+        .results-table .negative {
+            color: #ef4444; /* red-500 */
         }
     </style>
 </head>
@@ -68,69 +95,101 @@
 
         <div id="results" class="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200 hidden">
             <h2 class="text-xl font-semibold text-blue-800 mb-4">Kết quả tính toán:</h2>
-            <div class="space-y-3 text-gray-700">
-                <p><strong>Tỷ lệ NLĐ đóng BHXH:</strong> <span id="nldRate">10.5%</span></p>
-                <p><strong>Tỷ lệ Công ty đóng BHXH:</strong> <span id="companyRate">21.5%</span></p>
-                <hr class="my-3 border-blue-200">
-                <p>
-                    <strong>Lương BHXH Cũ (Giả định 5.008.000₫):</strong>
-                    <span id="oldBHXHSalary" class="font-medium"></span>
-                    <span class="explanation">(Dựa trên ví dụ trong tài liệu chuyển đổi lương)</span>
-                </p>
-                <p>
-                    <strong>Số tiền 10.5% lương BHXH cũ công ty cộng thêm vào Gross:</strong>
-                    <span id="addedToGross" class="font-medium"></span>
-                    <span class="explanation">(Lương BHXH Cũ * Tỷ lệ NLĐ đóng BHXH)</span>
-                </p>
-                <p>
-                    <strong>Lương Gross Mới:</strong>
-                    <span id="newGrossSalary" class="font-bold text-blue-700"></span>
-                    <span class="explanation">(Lương Net Cũ + Số tiền công ty cộng thêm)</span>
-                </p>
-                <hr class="my-3 border-blue-200">
-                <p>
-                    <strong>NLĐ đóng BHXH Mới (10.5% trên mức đóng BHXH mới):</strong>
-                    <span id="nldNewContribution" class="font-medium"></span>
-                    <span class="explanation">(Mức Lương Đóng BHXH Mới * Tỷ lệ NLĐ đóng BHXH)</span>
-                </p>
-                <p>
-                    <strong>Công ty đóng BHXH Cũ (21.5% trên mức đóng BHXH cũ):</strong>
-                    <span id="companyOldContribution" class="font-medium"></span>
-                    <span class="explanation">(Lương BHXH Cũ * Tỷ lệ Công ty đóng BHXH)</span>
-                </p>
-                <p>
-                    <strong>Công ty đóng BHXH Mới (21.5% trên mức đóng BHXH mới):</strong>
-                    <span id="companyNewContribution" class="font-medium"></span>
-                    <span class="explanation">(Mức Lương Đóng BHXH Mới * Tỷ lệ Công ty đóng BHXH)</span>
-                </p>
-                <hr class="my-3 border-blue-200">
-                <p>
-                    <strong>Thực nhận sau khi trừ BHXH (Lương Net Mới):</strong>
-                    <span id="newNetReceived" class="font-bold text-green-700"></span>
-                    <span class="explanation">(Lương Gross Mới - NLĐ đóng BHXH Mới)</span>
-                </p>
-                <p>
-                    <strong>Chênh lệch thực nhận (so với Lương Net Cũ):</strong>
-                    <span id="netDifference" class="font-bold text-red-600"></span>
-                    <span class="explanation">(Thực nhận sau khi trừ BHXH - Lương Net Cũ)</span>
-                </p>
-                <hr class="my-3 border-blue-200">
-                <p>
-                    <strong>Tổng chi phí công ty (Trước chuyển đổi):</strong>
-                    <span id="totalCompanyCostOld" class="font-bold text-gray-800"></span>
-                    <span class="explanation">(Lương Net Cũ + Công ty đóng BHXH Cũ)</span>
-                </p>
-                <p>
-                    <strong>Tổng chi phí công ty (Sau chuyển đổi):</strong>
-                    <span id="totalCompanyCostNew" class="font-bold text-gray-800"></span>
-                    <span class="explanation">(Lương Gross Mới + Công ty đóng BHXH Mới)</span>
-                </p>
-                <p>
-                    <strong>Chênh lệch Tổng chi phí công ty:</strong>
-                    <span id="companyCostDifference" class="font-bold text-gray-800"></span>
-                    <span class="explanation">(Tổng chi phí công ty Sau chuyển đổi - Tổng chi phí công ty Trước chuyển đổi)</span>
-                </p>
-            </div>
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Chỉ số</th>
+                        <th>Giá trị</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Tỷ lệ NLĐ đóng BHXH</td>
+                        <td><span id="nldRate">10.5%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Tỷ lệ Công ty đóng BHXH</td>
+                        <td><span id="companyRate">21.5%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Lương BHXH Cũ</td>
+                        <td>
+                            <span id="oldBHXHSalary" class="font-medium"></span>
+                            <span class="explanation-text">(Mức đóng cố định theo tài liệu chuyển đổi lương)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Số tiền 10.5% lương BHXH cũ công ty cộng thêm vào Gross</td>
+                        <td>
+                            <span id="addedToGross" class="font-medium"></span>
+                            <span class="explanation-text">(Lương BHXH Cũ * Tỷ lệ NLĐ đóng BHXH)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Lương Gross Mới</td>
+                        <td>
+                            <span id="newGrossSalary" class="highlight-value text-blue-700"></span>
+                            <span class="explanation-text">(Lương Net Cũ + Số tiền công ty cộng thêm)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>NLĐ đóng BHXH Mới (10.5% trên mức đóng BHXH mới)</td>
+                        <td>
+                            <span id="nldNewContribution" class="font-medium"></span>
+                            <span class="explanation-text">(Mức Lương Đóng BHXH Mới * Tỷ lệ NLĐ đóng BHXH)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Công ty đóng BHXH Cũ (21.5% trên mức đóng BHXH cũ)</td>
+                        <td>
+                            <span id="companyOldContribution" class="font-medium"></span>
+                            <span class="explanation-text">(Lương BHXH Cũ * Tỷ lệ Công ty đóng BHXH)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Công ty đóng BHXH Mới (21.5% trên mức đóng BHXH mới)</td>
+                        <td>
+                            <span id="companyNewContribution" class="font-medium"></span>
+                            <span class="explanation-text">(Mức Lương Đóng BHXH Mới * Tỷ lệ Công ty đóng BHXH)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Thực nhận sau khi trừ BHXH (Lương Net Mới)</td>
+                        <td>
+                            <span id="newNetReceived" class="highlight-value text-green-700"></span>
+                            <span class="explanation-text">(Lương Gross Mới - NLĐ đóng BHXH Mới)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Chênh lệch thực nhận (so với Lương Net Cũ)</td>
+                        <td>
+                            <span id="netDifference" class="highlight-value"></span>
+                            <span class="explanation-text">(Thực nhận sau khi trừ BHXH - Lương Net Cũ)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Tổng chi phí công ty (Trước chuyển đổi)</td>
+                        <td>
+                            <span id="totalCompanyCostOld" class="highlight-value text-gray-800"></span>
+                            <span class="explanation-text">(Lương Net Cũ + Công ty đóng BHXH Cũ)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Tổng chi phí công ty (Sau chuyển đổi)</td>
+                        <td>
+                            <span id="totalCompanyCostNew" class="highlight-value text-gray-800"></span>
+                            <span class="explanation-text">(Lương Gross Mới + Công ty đóng BHXH Mới)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Chênh lệch Tổng chi phí công ty</td>
+                        <td>
+                            <span id="companyCostDifference" class="highlight-value"></span>
+                            <span class="explanation-text">(Tổng chi phí công ty Sau chuyển đổi - Tổng chi phí công ty Trước chuyển đổi)</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
         <!-- Message Box for errors or notifications -->
@@ -235,18 +294,29 @@
             const netDiffElement = document.getElementById('netDifference');
             netDiffElement.textContent = formatCurrency(netDifference);
             if (netDifference < 0) {
-                netDiffElement.classList.add('text-red-600');
-                netDiffElement.classList.remove('text-green-600');
+                netDiffElement.classList.add('negative');
+                netDiffElement.classList.remove('positive');
             } else if (netDifference > 0) {
-                netDiffElement.classList.add('text-green-600');
-                netDiffElement.classList.remove('text-red-600');
+                netDiffElement.classList.add('positive');
+                netDiffElement.classList.remove('negative');
             } else {
-                netDiffElement.classList.remove('text-red-600', 'text-green-600');
+                netDiffElement.classList.remove('positive', 'negative');
             }
 
             document.getElementById('totalCompanyCostOld').textContent = formatCurrency(totalCompanyCostOld);
             document.getElementById('totalCompanyCostNew').textContent = formatCurrency(totalCompanyCostNew);
-            document.getElementById('companyCostDifference').textContent = formatCurrency(companyCostDifference);
+            
+            const companyCostDiffElement = document.getElementById('companyCostDifference');
+            companyCostDiffElement.textContent = formatCurrency(companyCostDifference);
+            if (companyCostDifference < 0) {
+                companyCostDiffElement.classList.add('negative');
+                companyCostDiffElement.classList.remove('positive');
+            } else if (companyCostDifference > 0) {
+                companyCostDiffElement.classList.add('positive');
+                companyCostDiffElement.classList.remove('negative');
+            } else {
+                companyCostDiffElement.classList.remove('positive', 'negative');
+            }
 
             document.getElementById('results').classList.remove('hidden');
         });
